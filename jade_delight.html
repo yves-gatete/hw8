@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css">
+<script
+  src="https://code.jquery.com/jquery-3.6.0.js"
+  integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+  crossorigin="anonymous">
+</script>
+<title>Jade Delight</title>
+</head>
+
+<body>
+<script language="javascript">
+
+function MenuItem(name, cost)
+{
+	this.name = name;
+	this.cost=cost;
+}
+
+menuItems = new Array(
+	new MenuItem("Chicken Chop Suey", 4.5),
+	new MenuItem("Sweet and Sour Pork", 6.25),
+	new MenuItem("Shrimp Lo Mein", 5.25),
+	new MenuItem("Moo Shi Chicken", 6.5),
+	new MenuItem("Fried Rice", 2.35)
+);
+
+function makeSelect(name, minRange, maxRange)
+{
+	var t= "";
+	t = "<select name='" + name + "' size='1'>";
+	for (j=minRange; j<=maxRange; j++)
+	   t += "<option>" + j + "</option>";
+	t+= "</select>"; 
+	return t;
+}
+</script>
+
+<h1>Jade Delight</h1>
+<form>
+
+<p><b>First Name:</b><br><input type="text"  name='fname' /></p>
+<p><b>Last Name*:</b> <br><input type="text"  name='lname' id = 'lname'/></p>
+<p class="street"><b>Street:</b> <br><input type="text"  name='street' id = "street" /></p>
+<p class="city" ><b>City:</b> <br><input type="text"  name='city' id = "city" /></p>
+<p><b>Phone*:</b> <br><input type="text"  name='phone' id='phone'/></p>
+<p> 
+	<input type="radio" id = "pickup" name="p_or_d" value = "pickup" checked="checked"/>Pickup  
+	<input type="radio" id = "delivery" name='p_or_d' value = 'delivery'/>
+	<!-- Hiding the street and city fields if delivery is not selected -->
+<script>
+	$(document).ready(function(){
+		$(function(){
+			$("p.street").hide();
+			$("p.city").hide();
+		});
+
+		$("#pickup").click(function(){
+			$("p.street").hide();
+			$("p.city").hide();
+		});
+
+		$("#delivery").click(function(){
+			$("p.street").show();
+			$("p.city").show();
+		});
+	});
+</script>
+Delivery
+</p>
+
+<table border="0" cellpadding="3">
+  <tr>
+    <th>Select Item</th>
+    <th>Item Name</th>
+    <th>Cost Each</th>
+    <th>Total Cost</th>
+  </tr>
+
+
+
+<script language="javascript">
+
+  var s = "";
+  for (i=0; i< menuItems.length; i++)
+  {
+	  s += "<tr><td>";
+	  s += makeSelect("quan" + i, 0, 10);
+	  s += "</td><td>" + menuItems[i].name + "</td>";
+	  s += "<td> $ " + menuItems[i].cost.toFixed(2) + "</td>";
+	  s += "<td>$<input type='text' name='cost'/></td></tr>";
+  }
+  document.writeln(s);
+// Check if any quantity is changed and update total cost
+
+for (var k = 0; k < menuItems.length; k++) {
+		// getting the quantities by name
+		document.getElementsByName("quan" + k)[0].onchange = CalculateCost;
+	}
+// fill in default values so that we can detect error later
+// if nothing is ordered
+// cfr code from my previous homework (Joe's Hotdogs part II)
+for (var i = 0; i < menuItems.length; i++){
+	var default_value = parseFloat("0");
+	document.getElementsByName("cost")[i].value = default_value.toFixed(2);
+}
+// calculating the the total cost of each item 
+function CalculateCost(e) {
+
+	var item = e.target; 
+	// console.log(typeof item)
+
+	//get index of the item changed 
+	var index = item.name.slice(-1);
+	var quantity = item.value;   
+	var total = quantity * menuItems[index].cost;
+	var total = total.toFixed(2);
+	// update the corresponding html field
+	document.getElementsByName("cost")[index].value = total;
+
+	// Next, make sure these values also get to subtotal and total
+	TotalCost();
+}
+
+// check for valid input 
+function validInput() {
+	if (validPhone() == false || validLastName() == false) {
+		if (validPhone() == false) {
+			alert("Please enter a correct phone number format");
+		}
+		if (validLastName() == false) {
+			alert("Please enter a last name");
+		}
+		return;
+	}
+	processOrder();
+}
+// checking validity of phone number 
+function validPhone() {
+	var phoneNum = document.getElementById("phone").value;
+
+	// source: w3resource.com/javascript/form/phone-no-validation.php
+	var validPhoneNum = /^\(?([0-9]{3})\)?[-]?([0-9]{3})[-]?([0-9]{4})$/;
+	//in-built method to check match
+	if (phoneNum.match(validPhoneNum)) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+// checking validity of last name
+function validLastName() {
+	var lastName = document.getElementById("lname").value;
+	if (lastName != "") {
+		return true;
+	} else {
+		return false;
+	}
+	return;
+}
+
+function processOrder() {
+	var pickup = document.getElementById("pickup").checked;
+	var street = document.getElementById("street").value;
+	var city = document.getElementById("city").value;
+	
+	// calculate time
+	var date = new Date();
+	if (pickup == true) {
+		arrivalTime = calculateTime(15);
+		alert( "Thank you for ordering with Jade Delight. Your order will be ready at: " 
+				+ arrivalTime + " . The total cost is: $" + 
+				document.getElementById("total").value);
+	} 
+	else {
+		if (street == "" || city == "") {
+		alert("Street and city required for delivery");
+		} 
+		else {
+			arrivalTime = calculateTime(30);
+			alert( "Thank you for ordering with Jade Delight. Your order will be delivered at: " 
+				+ arrivalTime + " . The total cost is: $" + 
+				document.getElementById("total").value);
+			}
+		}
+
+	// calculate time taken for 
+	function calculateTime (req_minutes) {
+		var date = new Date();
+		var hours = date.getHours();
+		var minutes = date.getMinutes();
+		minutes = minutes + req_minutes;
+		
+		if (minutes > 59) {
+			minutes = minutes % 60;				
+			if (hours == 23) {
+			hours = 0;
+			}
+			else {
+				hours += 1;
+			}
+		}
+		var arrivalTime = "";
+		if (hours < 10) {
+		arrivalTime += "0" + hours + ":";
+		} 
+		else {
+		arrivalTime += hours + ":";
+		}
+		if (minutes < 10) {
+		arrivalTime += "0" + minutes;
+		} else {
+		arrivalTime += minutes;
+		}
+		return arrivalTime;
+	}
+}
+
+
+</script>
+</table>
+<p>Subtotal: 
+   $<input type="text"  name='subtotal' id="subtotal" />
+</p>
+<p>Mass tax 6.25%:
+  $ <input type="text"  name='tax' id="tax" />
+</p>
+<p>Total: $ <input type="text"  name='total' id="total" />
+</p>
+
+<script language ="javascript">
+// fill in default values so that we can detect error later
+// if nothing is ordered
+var default_value = parseFloat("0");
+document.getElementById("subtotal").value = default_value.toFixed(2);
+document.getElementById("tax").value = default_value.toFixed(2);
+document.getElementById("total").value = default_value.toFixed(2);
+
+// calculating subtotal and total cost 
+function TotalCost()
+{
+	var subtotal = 0;
+	//looping through the ordered options
+	for (var i = 0; i < menuItems.length; i++) {
+		subtotal = parseFloat(subtotal);
+		// if (document.getElementsByName("cost")[i].value == "") {
+		// 	var default_value = parseFloat("0");
+		// 	document.getElementsByName("cost")[i].value = default_value.toFixed(2);
+		// }
+		var cost = document.getElementsByName("cost")[i].value;
+		subtotal += parseFloat(cost);
+	}
+	document.getElementById("subtotal").value = subtotal.toFixed(2);
+	document.getElementById("tax").value = (subtotal * 0.0625).toFixed(2);
+	document.getElementById("total").value = (subtotal + (subtotal * 0.0625)).toFixed(2);
+}
+
+</script>
+
+<button type = "button" value = "Submit Order" onclick = "validInput()"> Submit Order </button>
+
+</form>
+</body>
+</html>
